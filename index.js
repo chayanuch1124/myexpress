@@ -18,9 +18,10 @@ const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
 });
 
+
 // หน้าแรกสำหรับทดสอบ
 app.get('/', (req, res) => {
-  res.send('LINE Bot is running');
+  res.send('hello world, Chayanuch');
 });
 
 // ใช้ LINE middleware ตรวจสอบลายเซ็นและ parse body
