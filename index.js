@@ -1,45 +1,62 @@
 // index.js
-const express = require('express');
-const line = require('@line/bot-sdk');
+import express from 'express';
+import * as line from '@line/bot-sdk';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// สร้าง Express app
 const app = express();
 
-// ตั้งค่าจาก LINE Developers Console
+// LINE Config สำหรับ middleware
 const config = {
-  channelAccessToken: 'qlMGe6PrkUn/jVS362bpSFcZRhFz9jPKV13RHebiOx7gmpX6kTdHsw/6vXGCZKevQlMzwnFszLZsNjvQNO/nxTUMw9is8GXxr3LyAXDVmAFgHqhjqqwLCrBs9nD+s7yQ5BjL4NHnuAKUFiSotEYROAdB04t89/1O/w1cDnyilFU=',
-  channelSecret: 'cc27dd71455bf408d944c949fe6cf028'
+  channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
+// สร้าง Messaging API Client (SDK รุ่นใหม่)
+const client = new line.messagingApi.MessagingApiClient({
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+});
+
+// หน้าแรกสำหรับทดสอบ
+app.get('/', (req, res) => {
+  res.send('LINE Bot is running');
+});
+
+// ใช้ LINE middleware ตรวจสอบลายเซ็นและ parse body
 app.use('/webhook', line.middleware(config));
 
-//รับขWebhook
-app.post('/webhook', (req, res) => {
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then(result => res.json(result));
+// รับ Webhook จาก LINE
+app.post('/webhook', async (req, res) => {
+  try {
+    const results = await Promise.all(req.body.events.map(handleEvent));
+    res.json(results);
+  } catch (err) {
+    console.error('Webhook Error:', err);
+    res.status(500).end();
+  }
 });
 
-// ตอบกลับข้อความ
-const client = new line.messagingApi.MessagingApiClient({
-  channelAccessToken: config.channelAccessToken
-});
-
-function handleEvent(event) {
+// ฟังก์ชันจัดการ Event
+async function handleEvent(event) {
+  // รับเฉพาะข้อความ text
   if (event.type !== 'message' || event.message.type !== 'text') {
-    return Promise.resolve(null);
+    return null;
   }
 
-  return client.replyMessage({
+  // ตอบกลับข้อความ
+  return await client.replyMessage({
     replyToken: event.replyToken,
     messages: [
       {
         type: 'text',
-        text: `คุณพิมพ์ว่า: ${event.message.text}`
-      }
-    ]
+        text: `คุณพิมพ์ว่า: ${event.message.text}`,
+      },
+    ],
   });
 }
 
+// เริ่มต้น Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
