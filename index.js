@@ -21,7 +21,7 @@ const client = new line.messagingApi.MessagingApiClient({
 
 // หน้าแรกสำหรับทดสอบ
 app.get('/', (req, res) => {
-  res.send('hello world, Chayanuch');
+  res.send('hello world, Chayanuch Kullanitbaworndech');
 });
 
 // ใช้ LINE middleware ตรวจสอบลายเซ็นและ parse body
