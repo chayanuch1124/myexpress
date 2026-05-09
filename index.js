@@ -57,7 +57,7 @@ async function handleEvent(event) {
 }
 
 // เริ่มต้น Server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
